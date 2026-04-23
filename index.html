@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Access System</title>
+    <style>
+        .congrats-text {
+            display: inline-block;
+            padding: 20px 40px;
+            border: 2px solid #00ffcc;
+            background: repeating-linear-gradient(45deg, rgba(0,255,100,0.15), rgba(0,255,100,0.15) 10px, rgba(0,0,0,0.6) 10px, rgba(0,0,0,0.6) 20px);
+            box-shadow: 0 0 20px #00ff66;
+            text-shadow: 0 0 10px #00ff66;
+            border-radius: 12px;
+        }
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: black;
+            color: #00ffcc;
+            font-family: monospace;
+            text-align: center;
+            padding-top: 80px;
+        }
+
+        button {
+            position: relative;
+            z-index: 50;
+            padding: 10px 20px;
+            margin: 10px;
+            background: #00ffcc;
+            border: none;
+            cursor: pointer;
+        }
+
+        input {
+            position: relative;
+            z-index: 50;
+            padding: 10px;
+            background: black;
+            color: #00ffcc;
+            border: 1px solid #00ffcc;
+        }
+
+        #menu, #eventA, #eventB {
+            display: none;
+            position: relative;
+            z-index: 20;
+        }
+            #matrix {
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: black;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+<canvas id="matrix" aria-hidden="true"></canvas>
+<div class="content" style="position: relative; z-index: 10; text-align: center; padding-top: 80px; width: 100%;">
+
+<div id="menu" style="display: block; position: relative; z-index: 20;">
+    <h2>&gt; SELECT EVENT</h2>
+    <button type="button" onclick="document.getElementById('menu').style.display='none';document.getElementById('eventA').style.display='block';" style="position: relative; z-index: 30;">International Webinar</button>
+    <button type="button" onclick="document.getElementById('menu').style.display='none';document.getElementById('eventB').style.display='block';" style="position: relative; z-index: 30;">IPSF Weave</button>
+</div>
+
+<div id="eventA">
+    <h2>&gt; INTERNATIONAL WEBINAR</h2>
+    <p>Enter password:</p>
+    <input type="password" id="passA">
+    <br><br>
+    <button type="button" onclick="checkA()" style="position: relative; z-index: 30;">ENTER</button>
+    <div id="resultA"></div>
+    <br>
+    <button onclick="back()">⬅ BACK</button>
+</div>
+
+<div id="eventB">
+    <h2>&gt; IPSF WEAVE</h2>
+    <p>Enter password:</p>
+    <input type="password" id="passB">
+    <br><br>
+    <button type="button" onclick="checkB()" style="position: relative; z-index: 30;">ENTER</button>
+    <div id="resultB"></div>
+    <br>
+    <button onclick="back()">⬅ BACK</button>
+</div>
+
+<script>
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*(){}[]<>?/|';
+const fontSize = 16;
+let columns = Math.floor(window.innerWidth / fontSize);
+let drops = Array(columns).fill(1);
+
+window.addEventListener('resize', () => {
+    columns = Math.floor(window.innerWidth / fontSize);
+    drops = Array(columns).fill(1);
+});
+
+function draw() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#00ff66';
+    ctx.font = fontSize + 'px monospace';
+
+    for (let i = 0; i < drops.length; i++) {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+    }
+}
+setInterval(draw, 35);
+
+function back() {
+    document.getElementById('menu').style.display = 'block';
+    document.getElementById('eventA').style.display = 'none';
+    document.getElementById('eventB').style.display = 'none';
+}
+
+function processAccess(resultId, commonPasswords, specialPassword, clueName, finalMessage) {
+    const pass = document.getElementById(resultId === 'resultA' ? 'passA' : 'passB').value.trim().toLowerCase();
+    const result = document.getElementById(resultId);
+
+    result.innerHTML = '<p>> INITIALIZING ACCESS...</p>';
+
+    setTimeout(() => {
+        result.innerHTML = '<p style="color:red;">> ACCESS DENIED</p>';
+    }, 1200);
+
+    setTimeout(() => {
+        result.innerHTML = '<p>> RETRYING AUTHENTICATION...</p>';
+    }, 2500);
+
+    setTimeout(() => {
+        if (commonPasswords.includes(pass)) {
+            result.innerHTML = '<p>> ACCESS GRANTED</p><p>> DECRYPTING DATA...</p><h1><span class="congrats-text">' + clueName + '</span></h1><h2>has been selected for the next Chairperson</h2>';
+        } else if (pass === specialPassword) {
+            result.innerHTML = '<p>> ACCESS GRANTED</p><p>> DECRYPTING FINAL DATA...</p><h1><span class="congrats-text">CONGRATULATIONS!</span></h1><h2>' + finalMessage + '</h2>';
+        } else {
+            result.innerHTML = '<p style="color:red;">ACCESS DENIED</p>';
+        }
+    }, 4200);
+}
+
+function checkA() {
+    processAccess(
+        'resultA',
+        ['jeffry','hariette','sarah','fiorella','shoniyah','andrew','axelle','christine','brigitta','nurafiah'],
+        'khansa',
+        'KHANSA',
+        'You have been selected for the next Chairperson of International Webinar'
+    );
+}
+
+function checkB() {
+    processAccess(
+        'resultB',
+        ['jeffry','hariette','sarah','fiorella','shoniyah','andrew','axelle','christine','khansa','nurafiah'],
+        'brigitta',
+        'BRIGITTA',
+        'You have been selected for the next Chairperson of IPSF Weave'
+    );
+}
+</script>
+</body>
+</html>
